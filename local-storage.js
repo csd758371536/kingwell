@@ -56,9 +56,9 @@
 				result = localStorage.getItem(sName);
 			} else {
 				try {
-					this.userDataStroage.getItem(sName)
+					result = this.userDataStroage.getItem(sName)
 				} catch (e) {
-					this.getCookie(sName);
+					result = this.getCookie(sName);
 				}
 			}
 			return result;
