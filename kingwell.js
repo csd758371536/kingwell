@@ -1,29 +1,89 @@
 (function(window, undefied) {
-	'use strict';
+	"use strict";
 	var doc = document,
 		doe = doc.documentElement,
-		kingwell,
+		kingwell, kw, KW,
+		fn,
 		userAgent = navigator.userAgent.toLowerCase(),
 		isIE = /msie/.test(userAgent),
 		deepCopy = function(source) {
 			var result = {};
 			for (var key in source) {
-				result[key] = typeof source[key] === 'object' ? deepCoyp(source[key]) : source[key];
+				result[key] = typeof source[key] === 'object' ? deepCopy(source[key]) : source[key];
 			}
 			return result;
 		},
-		extend = function(sub, parent, deep) {
-			var subObj = sub || {};
-			var parentObj = parent || {};
+		extend = function(tagert, source, deep) {
+			var subObj = tagert || {};
+			var parentObj = source || {};
 			parentObj = deepCopy(parentObj);
 			for (var key in parentObj) {
 				subObj[key] = parentObj[key];
 			}
 			return subObj;
 		};
+
+	//时间
+	function MyDate() {}
+	MyDate.prototype = {
+		fixZero: function(num) {
+			return num < 10 ? '0' + num : num;
+		},
+		isLeapYear: function(year) {
+			return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+		},
+		getMaxDates: function(year, month) {
+			var m = month + 1,
+				result;
+			if (m === 4 || m === 6 || m === 9 || m === 11) {
+				result = 30;
+			} else if (m === 2) {
+				result = this.isLeapYear(year) ? 29 : 28;
+			} else {
+				result = 31;
+			}
+			return result;
+		},
+		getDate: function() {
+			return new Date();
+		},
+		getCurrentDate: function(dateObj, format) {
+			var formats = ['yyyy-mm-dd', 'yyyy/mm/dd', 'yyyy.mm.dd'],
+				date = dateObj || this.getDate(),
+				line = '-',
+				status = false;
+			for (var i = 0; i < formats.length; i++) {
+				if (formats[i].toLowerCase() === format) {
+					status = true;
+					line = formats[i].slice(4, 5);
+				}
+			}
+			return date.getFullYear() + line + this.fixZero(date.getMonth() + 1) + line + this.fixZero(date.getDate());
+		},
+		compatibleDateFormat: function(dateString) {
+			var date = dateString || '';
+			return date.replace(/-/g, '/');
+		},
+		getDates: function(start, end) {
+			var _start, _end,
+				argStart, argEnd,
+				result = 0;
+			if (arguments.length === 1) {
+				argStart = new Date();
+				argEnd = start;
+			} else {
+				argStart = this.compatibleDateFormat(start);
+				argEnd = this.compatibleDateFormat(end);
+			}
+			_start = new Date(argStart);
+			_end = new Date(argEnd);
+			result = Math.floor((_end.getTime() - _start.getTime()) / (1000 * 60 * 60 * 24));
+			return isNaN(result) ? 0 : result;
+		}
+	};
 	//判断是否某种类型
-	function IsType() {}
-	IsType.prototype = {
+	function MyType() {}
+	MyType.prototype = {
 		is: function(o, type) {
 			var obj = Object.prototype.toString.call(o);
 			if (arguments.length === 2) {
@@ -51,13 +111,13 @@
 			return (o && o.nodeName) ? true : false;
 		},
 		isForm: function(obj) {
-			var o = this.Dom.getId(obj);
+			var o = this.MyDom.getId(obj);
 			return this.isElement(o) && (o.tagName.toLowerCase() === 'input' || o.tagName.toLowerCase() === 'textarea');
 		}
 	};
-	//Dom Edit
-	function Dom() {}
-	Dom.prototype = {
+	//MyDom Edit
+	function MyDom() {}
+	MyDom.prototype = {
 		getId: function(id) {
 			return this.isString(id) ? doc.getElementById(id) : id;
 		},
@@ -77,7 +137,7 @@
 				return true;
 			}
 		},
-		create: function(elem, obj) {
+		createElement: function(elem, obj) {
 			var element = doc.createElement(elem);
 			for (var pro in obj) {
 				if (pro === 'class' || pro === 'className') {
@@ -101,23 +161,37 @@
 			return elem;
 		},
 		text: function(node, text) {
+			var result,
+				_text = function(node) {
+					var result = [],
+						chilrens = node.childNodes,
+						len = chilrens.length,
+						i, element;
+					for (i = 0; i < len; i++) {
+						element = chilrens[i];
+						if (element.nodeType === 3) {
+							result.push(element.nodeValue);
+						} else {
+							result.push(_text(element));
+						}
+					}
+					return result.join('');
+				};
 			if (!this.isElement(node)) {
-				return;
-			}
-			if (arguments.length > 1) {
-				if (!isIE) {
-					node.textContent = text;
-				} else {
-					node.innerText = text;
-				}
+				result = node;
 			} else {
-				if (!isIE) {
-					return node.textContent;
+				if (arguments.length === 1) {
+					result = _text(node);
 				} else {
-					return node.innerText;
+					if (node.textContent) {
+						node.textContent = text;
+					} else if (node.innerHTML) {
+						node.innerHTML = text;
+					}
+					result = node;
 				}
 			}
-			return node;
+			return result;
 		},
 		val: function(elem, value) {
 			if (this.isForm(elem)) {
@@ -169,11 +243,64 @@
 				}
 			}
 			return nextNode.nodeType === 1 ? nextNode : null;
+		},
+		empty: function(node) {
+			if (this.isElement(node)) {
+				while (node.firstChild) {
+					node.removeChild(node.firstChild);
+				}
+			}
+			return node;
+		},
+		addClass: function(o, str) {
+			if (!this.isElement(o)) {
+				return;
+			}
+			var className = o.className,
+				reg = eval("/^" + str + "$ | " + str + "$|^" + str + " | " + str + " /");
+			if (reg.test(className)) {
+				return;
+			}
+			if (className !== '') {
+				o.className = className + " " + str;
+			} else {
+				o.className = str;
+			}
+		},
+		removeClass: function(o, str) {
+			if (!this.isElement(o)) {
+				return;
+			}
+			var className = o.className;
+			if (this.isEmpty(className)) {
+				var reg = new RegExp(str, "g"),
+					n = className.replace(reg, "");
+				o.className = n;
+			}
+		},
+		hasClass: function(o, str) {
+			if (!this.isElement(o)) {
+				return;
+			}
+			var className = o.className,
+				reg = eval("/^" + str + "$| " + str + "$|^" + str + " | " + str + " /");
+			if (reg.test(className)) {
+				return true;
+			} else {
+				return false;
+			}
 		}
+	};
+	//MyEvent
+	function MyEvent() {}
+	MyEvent.prototype = {
+		on: function() {},
+		off: function() {}
 	};
 
 	function Kingwell() {}
-	Kingwell.prototype = {
+	Kingwell.prototype = fn = {
+		extend: extend,
 		trim: function(str) { //Trim String
 			var result = '',
 				reg = /^\s*(.*?)\s*$/;
@@ -202,8 +329,20 @@
 			return result;
 		}
 	};
-	extend(Kingwell.prototype, new IsType);
-	extend(Kingwell.prototype, new Dom);
-	window.kingwell = new Kingwell();
-	console.log(window.kingwell);
+
+	KW = {
+		extend: extend,
+		Type: MyType,
+		Dom: MyDom,
+		Event: MyEvent,
+		Date: MyDate
+	};
+
+	//继承
+	for (var key in KW) {
+		extend(fn, new KW[key]);
+	}
+	window.kw = new Kingwell();
+	window.KW = KW;
+
 })(this);

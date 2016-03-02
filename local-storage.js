@@ -11,11 +11,6 @@
 
 	function LocalStorage() {}
 	LocalStorage.prototype = {
-		log: function() {
-			try {
-				console.log.apply(console, arguments);
-			} catch (e) {}
-		},
 		set: function(sName, sValue, oExpires, sPath, sDomain, bSecure) {
 			var cookies, name, value, expires, path, domain, secure;
 			if (arguments.length < 2) {
