@@ -1,0 +1,34 @@
+table.calendar {
+  font-size: 14px;
+  border-spacing: 0;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+table.calendar thead td {
+  background-color: #fafafa;
+}
+table.calendar td,
+table.calendar th {
+  padding: 10px 15px;
+  text-align: center;
+  vertical-align: middle;
+}
+table.calendar tbody .calendar-today {
+  background-color: #D68000;
+}
+table.calendar tbody .calendar-this-date {
+  color: #333;
+}
+table.calendar tbody .calendar-weekend {
+  color: #f00;
+}
+table.calendar tbody .calendar-ohter-date {
+  color: blue;
+}
+table.calendar tbody .calendar-disabled-date {
+  cursor: default;
+  color: #ccc !important;
+}
+table.calendar tbody .calendar-ebabled-date {
+  cursor: pointer;
+}
