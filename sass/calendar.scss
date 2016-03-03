@@ -1,0 +1,51 @@
+table.calendar {
+	font-size: 14px;
+	border-spacing: 0;
+	border-collapse: collapse;
+	background-color: #fff;
+
+	thead {
+		td {
+			background-color: #fafafa;
+		}
+
+	}
+
+	td,
+	th {
+		//border: 1px solid #ccc;
+		padding: 10px 15px;
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	tbody {
+		.calendar-today {
+			background-color: #D68000;
+		}
+
+		.calendar-this-date {
+			color: #333;
+		}
+
+		.calendar-weekend {
+			//background-color: #eee;
+			color: #f00;
+		}
+
+		.calendar-ohter-date {
+			color: blue;
+		}
+
+		.calendar-disabled-date {
+			cursor: default;
+			color: #ccc !important;
+		}
+
+		.calendar-ebabled-date {
+			cursor: pointer;
+		}
+
+	}
+
+}

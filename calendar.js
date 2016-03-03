@@ -65,6 +65,9 @@
 				firstDay,
 				nowMonthDate, prevMonthDate, nextMonthDate = 1,
 				nowDate, prevDate, nextDate,
+				currentDate,
+				dateObj,
+
 				loop = function() {
 					var element = this;
 					(function() {
@@ -106,7 +109,9 @@
 				this.tbody.insertRow(i);
 				for (var j = 0; j < 7; j++) {
 					var th, td = this.tbody.rows[i].insertCell(j),
-						num = i * 7 + j;
+						num = i * 7 + j,
+						status = true,
+						getMaxDateStatus, getMinDateStatus;
 					nowMonthDate = num - firstDay + 1;
 					prevMonthDate = Math.abs(firstDay - j - _this.getMaxDates(_year, _month - 1) - 1);
 					if (!i && !j) {
@@ -123,34 +128,61 @@
 					//设置内容
 					if (num < firstDay) { //上个月的天数
 						td.innerHTML = prevMonthDate;
-						prevDate = getNewDate(_year, _month - 1, prevMonthDate);
-						addDisabledStyle(td, prevDate);
+						currentDate = getNewDate(_year, _month - 1, prevMonthDate);
+						//addDisabledStyle(td, prevDate);
+						//dateObj = prevDate;
 					} else if (num >= days + firstDay) { //下个月的天数
 						td.innerHTML = nextMonthDate;
 						nextMonthDate++;
-						nextDate = getNewDate(_year, _month, nowMonthDate);
-						addDisabledStyle(td, nextDate);
-
+						currentDate = getNewDate(_year, _month, nowMonthDate);
+						//addDisabledStyle(td, nextDate);
+						//dateObj = nextDate;
+						console.log(_this.getCurrentDate(dateObj));
 					} else { //本月
 						td.innerHTML = nowMonthDate;
 						loop.call(td);
-						nowDate = getNewDate(_year, _month, nowMonthDate);
-						addDisabledStyle(td, nowDate);
+						currentDate = getNewDate(_year, _month, nowMonthDate);
+						//addDisabledStyle(td, nowDate);
+						//dateObj = nowDate;
 					}
 					//设置样式
 					if (j === 0 || j === 6) { //周末
 						_this.addClass(td, _this.name + '-weekend');
 					}
 					if (nowMonthDate === _date) {
-						_this.addClass(td, _this.name + '-current');
+						_this.addClass(td, _this.name + '-today');
 					}
 					if (num < firstDay || num >= days + firstDay) {
 						_this.addClass(td, _this.name + '-ohter-date');
 					} else {
 						_this.addClass(td, _this.name + '-this-date');
 					}
-
-
+					getMaxDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.maxDate) < 0;
+					getMinDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.minDate) > 0;
+					if (_this.maxDate) {
+						if (getMaxDateStatus) {
+							_this.addClass(td, _this.name + '-disabled-date');
+							status = false;
+						} else {
+							status = true;
+						}
+					}
+					if (_this.minDate) {
+						if (getMinDateStatus) {
+							_this.addClass(td, _this.name + '-disabled-date');
+							status = false;
+						} else {
+							status = true;
+						}
+					}
+					console.log(status);
+					if (status) {
+						(function() {
+							td.onclick = function() {
+								alert(0);
+							};
+						})();
+					}
 
 				}
 			}
