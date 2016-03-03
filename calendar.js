@@ -82,19 +82,6 @@
 					_date.setMonth(month);
 					_date.setDate(date);
 					return _date;
-				},
-				addDisabledStyle = function(td, dateObj) {
-					var currentDate = _this.getCurrentDate(dateObj);
-					if (_this.maxDate) {
-						if (_this.getDates(_this.getCurrentDate(dateObj), _this.maxDate) < 0) {
-							_this.addClass(td, _this.name + '-disabled-date');
-						}
-					}
-					if (_this.minDate) {
-						if (_this.getDates(_this.getCurrentDate(dateObj), _this.minDate) > 0) {
-							_this.addClass(td, _this.name + '-disabled-date');
-						}
-					}
 				};
 
 			_year = dateObj.getFullYear();
@@ -102,8 +89,11 @@
 			_date = dateObj.getDate();
 			days = _this.getMaxDates(_year, _month);
 			firstDay = new Date(_year, _month, 1).getDay(), showMonth = _month + 1;
+
+			//Clear Table
 			_this.empty(_this.thead);
 			_this.empty(_this.tbody);
+
 			for (var i = 0; i < 6; i++) {
 
 				this.tbody.insertRow(i);
@@ -114,6 +104,8 @@
 						getMaxDateStatus, getMinDateStatus;
 					nowMonthDate = num - firstDay + 1;
 					prevMonthDate = Math.abs(firstDay - j - _this.getMaxDates(_year, _month - 1) - 1);
+
+					//插件头部-星期
 					if (!i && !j) {
 						this.thead.insertRow(i);
 					}
@@ -125,26 +117,56 @@
 							_this.addClass(th, _this.name + '-weekend');
 						}
 					}
-					//设置内容
-					if (num < firstDay) { //上个月的天数
+					//设置文本内容
+					if (num < firstDay) { //上个月
 						td.innerHTML = prevMonthDate;
 						currentDate = getNewDate(_year, _month - 1, prevMonthDate);
-						//addDisabledStyle(td, prevDate);
-						//dateObj = prevDate;
-					} else if (num >= days + firstDay) { //下个月的天数
+					} else if (num >= days + firstDay) { //下个月
 						td.innerHTML = nextMonthDate;
 						nextMonthDate++;
 						currentDate = getNewDate(_year, _month, nowMonthDate);
-						//addDisabledStyle(td, nextDate);
-						//dateObj = nextDate;
-						console.log(_this.getCurrentDate(dateObj));
 					} else { //本月
 						td.innerHTML = nowMonthDate;
-						loop.call(td);
 						currentDate = getNewDate(_year, _month, nowMonthDate);
-						//addDisabledStyle(td, nowDate);
-						//dateObj = nowDate;
 					}
+
+
+					getMaxDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.maxDate) < 0;
+					getMinDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.minDate) > 0;
+
+					if (_this.maxDate) {
+						if (getMaxDateStatus) {
+							status = false;
+						} else {
+							status = true;
+						}
+					}
+					if (_this.minDate) {
+						if (getMinDateStatus) {
+							status = false;
+						} else {
+							status = true;
+						}
+					}
+					if (_this.minDate && _this.maxDate) {
+						if (getMaxDateStatus || getMinDateStatus) {
+							status = false;
+						} else {
+							status = true;
+						}
+					}
+
+
+					if (status) {
+
+						(function() {
+							td.onclick = function() {
+								alert(0);
+							};
+						})();
+					}
+
+
 					//设置样式
 					if (j === 0 || j === 6) { //周末
 						_this.addClass(td, _this.name + '-weekend');
@@ -153,36 +175,16 @@
 						_this.addClass(td, _this.name + '-today');
 					}
 					if (num < firstDay || num >= days + firstDay) {
-						_this.addClass(td, _this.name + '-ohter-date');
+						_this.addClass(td, _this.name + '-non-current');
 					} else {
-						_this.addClass(td, _this.name + '-this-date');
+						_this.addClass(td, _this.name + '-current');
 					}
-					getMaxDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.maxDate) < 0;
-					getMinDateStatus = _this.getDates(_this.getCurrentDate(currentDate), _this.minDate) > 0;
-					if (_this.maxDate) {
-						if (getMaxDateStatus) {
-							_this.addClass(td, _this.name + '-disabled-date');
-							status = false;
-						} else {
-							status = true;
-						}
+					if (!status) {
+						_this.addClass(td, _this.name + '-disabled');
+					} else {
+						_this.addClass(td, _this.name + '-enabled');
 					}
-					if (_this.minDate) {
-						if (getMinDateStatus) {
-							_this.addClass(td, _this.name + '-disabled-date');
-							status = false;
-						} else {
-							status = true;
-						}
-					}
-					console.log(status);
-					if (status) {
-						(function() {
-							td.onclick = function() {
-								alert(0);
-							};
-						})();
-					}
+
 
 				}
 			}

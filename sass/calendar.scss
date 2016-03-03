@@ -20,12 +20,13 @@ table.calendar {
 	}
 
 	tbody {
-		.calendar-today {
-			background-color: #D68000;
+		.calendar-current {
+			color: #333;
 		}
 
-		.calendar-this-date {
-			color: #333;
+		.calendar-today {
+			background-color: #f65;
+			color: #fff;
 		}
 
 		.calendar-weekend {
@@ -33,16 +34,17 @@ table.calendar {
 			color: #f00;
 		}
 
-		.calendar-ohter-date {
+		.calendar-non-current {
 			color: blue;
 		}
 
-		.calendar-disabled-date {
+		.calendar-disabled {
 			cursor: default;
+			background-color: #fff;
 			color: #ccc !important;
 		}
 
-		.calendar-ebabled-date {
+		.calendar-enabled {
 			cursor: pointer;
 		}
 
