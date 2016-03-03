@@ -291,6 +291,100 @@
 			}
 		}
 	};
+	//MyCss
+	function MyCss() {}
+	MyCss.prototype = {
+		getComputedStyle: function(element, styleName) {
+			var style = '';
+			if (window.getComputedStyle) {
+				style = element.ownerDocument.defaultView.getComputedStyle(element, null).getPropertyValue(styleName);
+			} else if (element.currentStyle) {
+				style = element.currentStyle[styleName];
+			}
+			return style;
+		},
+		setStyle: function(o, obj) {
+			if (this.isElement(o) && this.isPlainObject(obj)) {
+				for (var i in obj) {
+					o.style[i] = obj[i];
+				}
+			}
+		},
+		setCss: function(tar, obj) {
+			var o = this.getId(tar);
+			if (this.isElement(o) && this.isPlainObject(obj)) {
+				var str = '';
+				for (var i in obj) {
+					str += i + ':' + obj[i] + '; ';
+				}
+				o.style.cssText += (' ;' + str);
+			}
+			return o;
+		},
+		setOpacity: function(obj, val) {
+			if (!this.isElement(obj)) {
+				return;
+			}
+			var num = (val && val >= 0 && val <= 100) ? val : 100;
+			if (d.addEventListener) {
+				obj.style.opacity = num / 100;
+			} else {
+				obj.style.filter = 'alpha(opacity=' + num + ')';
+			}
+		},
+		getMaxZindex: function(o) {
+			var maxZindex = 0,
+				obj = o ? o : '*',
+				divs = d.getElementsByTagName(obj);
+			for (var z = 0, len = divs.length; z < len; z++) {
+				maxZindex = Math.max(maxZindex, divs[z].style.zIndex);
+			}
+			return maxZindex;
+		}
+	};
+	//MyBox
+	function MyBox() {}
+	MyBox.prototype = {
+		getBox: function(o) {
+			var obj = o;
+			return {
+				left: parseInt(obj.offsetLeft, 10),
+				top: parseInt(obj.offsetTop, 10),
+				width: parseInt(obj.offsetWidth, 10),
+				height: parseInt(obj.offsetHeight, 10)
+			};
+		},
+		getPosition: function(obj) {
+			var o = this.getId(obj);
+			if (!this.isElement(o)) {
+				return null;
+			}
+			var t = parseInt(o.offsetTop, 10),
+				l = parseInt(o.offsetLeft, 10),
+				w = parseInt(o.offsetWidth, 10),
+				h = parseInt(o.offsetHeight, 10);
+			while (o = o.offsetParent) {
+				t += parseInt(o.offsetTop, 10);
+				l += parseInt(o.offsetLeft, 10);
+			}
+			return {
+				left: l,
+				top: t,
+				width: w,
+				height: h
+			};
+		},
+		getQueryString: function(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"),
+				r = location.search.substr(1).match(reg);
+			if (r !== null)
+				return unescape(r[2]);
+			return null;
+		},
+		isPlainObject: function(obj) {
+			return (!obj || !this.isObject(obj) || obj.nodeType || obj.setInterval) ? false : true;
+		}
+	};
 	//MyEvent
 	function MyEvent() {}
 	MyEvent.prototype = {
@@ -334,8 +428,10 @@
 		extend: extend,
 		Type: MyType,
 		Dom: MyDom,
+		Css: MyCss,
 		Event: MyEvent,
-		Date: MyDate
+		Date: MyDate,
+		Box: MyBox
 	};
 
 	//继承
