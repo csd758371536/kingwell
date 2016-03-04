@@ -6,7 +6,9 @@
 		weekStart: 0,
 		error: function() {},
 		callback: function() {},
+		selected: function() {},
 		top: 5,
+		left: 0,
 		minDate: '',
 		maxDate: '',
 		readOnly: true,
@@ -26,7 +28,7 @@
 		this.maxDate = this.compatibleDateFormat(this.maxDate);
 		this.minDate = this.compatibleDateFormat(this.minDate);
 
-		this.DATE = this.getDate();
+		this.DATE = this.getDate(); /*new Date('2016-03-25');*/ //
 		this.Y = this.DATE.getFullYear();
 		this.M = this.DATE.getMonth();
 		this.D = this.DATE.getDate();
@@ -44,10 +46,9 @@
 		setPostion: function() {
 			var _this = this,
 				pos = _this.getPosition(_this.el);
-			console.log(pos);
 			_this.setCss(_this.box, {
 				top: pos.top + pos.height + _this.top + 'px',
-				left: pos.left + 'px'
+				left: pos.left + _this.left + 'px'
 			});
 		},
 		init: function() {
@@ -100,7 +101,7 @@
 				});
 			};
 		},
-		create: function() {
+		__createYear: function() {
 			var _this = this;
 			_this.box = _this.createElement('div', {
 				className: _this.name + '-box'
@@ -156,7 +157,9 @@
 			_this.append(_this.yearNext, _this.yearPage);
 			_this.append(_this.yearPage, _this.yearBox);
 			_this.append(_this.yearBox, _this.box);
-
+		},
+		__createMonth: function() {
+			var _this = this;
 			//月份
 			var monthTableElements = [{
 				monthBox: ['div', {
@@ -196,7 +199,9 @@
 			_this.append(_this.monthTable, _this.monthTableBox);
 			_this.append(_this.monthTableBox, _this.monthBox);
 			_this.append(_this.monthBox, _this.box);
-
+		},
+		__createDate: function() {
+			var _this = this;
 			//天数
 			var dateTableElments = [{
 				dateBox: ['div', {
@@ -239,7 +244,11 @@
 
 			_this.append(_this.dateBox, _this.box);
 			_this.append(_this.box);
-
+		},
+		create: function() {
+			this.__createYear();
+			this.__createMonth();
+			this.__createDate();
 		},
 		createElements: function(context, attr) {
 			var _this = this,
@@ -251,9 +260,11 @@
 			}
 			return context;
 		},
-		getStatus: function(value, type) {
+		getEnableStatus: function(value, type) { //获取日期范围
 			var _this = this,
 				status = true,
+				minStatus, maxStatus,
+				date,
 				minDate = new Date(_this.minDate),
 				maxDate = new Date(_this.maxDate);
 			switch (type) {
@@ -262,8 +273,17 @@
 					maxStatus = value > maxDate.getFullYear();
 					break;
 				case 'month':
-					minStatus = value < minDate.getMonth();
-					maxStatus = value > maxDate.getMonth();
+					date = new Date();
+					date.setYear(_this.Y);
+					date.setMonth(value);
+					if (_this.minDate) {
+						date.setDate(_this.getMaxDates(_this.Y, value));
+						minStatus = _this.getDates(_this.minDate, _this.getCurrentDate(date)) < 0;
+					}
+					if (_this.maxDate) {
+						date.setDate(1);
+						maxStatus = _this.getDates(_this.maxDate, _this.getCurrentDate(date)) > 0;
+					}
 					break;
 				case 'date':
 					minStatus = _this.getDates(_this.getCurrentDate(value), _this.maxDate) < 0;
@@ -299,6 +319,13 @@
 			}
 			return status;
 		},
+		getNewDate: function(year, month, date) {
+			var _date = new Date();
+			_date.setYear(year);
+			_date.setMonth(month);
+			_date.setDate(date);
+			return _date;
+		},
 		updateYear: function(options) {
 			var _this = this,
 				ops = options || {},
@@ -311,6 +338,7 @@
 				tbodyTr, td, i = 0;
 			_this.empty(_this.yearTbody);
 			_this.yearHeader.innerHTML = _this.Y + _this.headerUnit[0];
+			console.log(_this.Y);
 			for (var y = _year - 5; y < _year + 5; y++) {
 				var status = true;
 				if (i % grid === 0) {
@@ -321,13 +349,16 @@
 				if (y === _this.Y) {
 					_this.addClass(td, _this.name + '-this-year');
 				}
-				status = _this.getStatus(y, 'year');
+				status = _this.getEnableStatus(y, 'year');
 				if (status) {
 					(function(year) {
 						td.onclick = function() {
 							_this.Y = year;
-							_this.updateYear();
-							_this.updateDate({});
+							_this.updateYear({
+								year: _this.yearNum
+							});
+							_this.updateMonth();
+							_this.updateDate();
 						};
 					})(y);
 					_this.addClass(td, _this.name + '-enabled');
@@ -359,14 +390,20 @@
 				if (m === _this.M) {
 					_this.addClass(td, _this.name + '-this-month');
 				}
-				status = _this.getStatus(m, 'month');
+				status = _this.getEnableStatus(m, 'month');
 
 				if (status) {
 					(function(month) {
+
 						td.onclick = function() {
 							_this.M = month;
 							_this.updateMonth();
-							_this.updateDate();
+							var date = new Date();
+							date.setYear(_this.Y);
+							date.setMonth(_this.M);
+							_this.updateDate({
+								date: date
+							});
 						};
 					})(m);
 				}
@@ -380,22 +417,13 @@
 			}
 			_this.append(frg, _this.monthTbody);
 		},
-		getNewDate: function(year, month, date) {
-			var _date = new Date();
-			_date.setYear(year);
-			_date.setMonth(month);
-			_date.setDate(date);
-			return _date;
-		},
+
 		updateDate: function(options) {
 			var _this = this,
 				ops = options || {},
 				dateObj = ops.date || _this.DATE,
-				_year,
-				_month,
-				_date,
-				days,
-				firstDay,
+				_year, _month, _date,
+				days, firstDay,
 				nowMonthDate, prevMonthDate, nextMonthDate = 1,
 				currentDate,
 				dateObj, frg = document.createDocumentFragment();
@@ -445,7 +473,6 @@
 
 					//设置文本内容
 					if (num < firstDay) { //上个月
-
 						current = prevMonthDate;
 						month = -1;
 						currentDate = _this.getNewDate(_year, _month - 1, prevMonthDate);
@@ -453,23 +480,21 @@
 						if (showAllDate) {
 							td.innerHTML = prevMonthDate;
 						}
-
 					} else if (num >= days + firstDay) { //下个月
-
 						current = nextMonthDate;
-						nextMonthDate++;
 						currentDate = _this.getNewDate(_year, _month, nowMonthDate);
 						showAllDate = _this.showAllDate;
 						if (showAllDate) {
 							td.innerHTML = nextMonthDate;
 						}
+						nextMonthDate++;
 					} else { //本月
 						td.innerHTML = nowMonthDate;
 						current = nowMonthDate;
 						month = 1;
 						currentDate = _this.getNewDate(_year, _month, nowMonthDate);
 					}
-					status = _this.getStatus(currentDate, 'date');
+					status = _this.getEnableStatus(currentDate, 'date');
 
 					if (status) {
 						(function(date, month, currentDate, showAllDate) {
@@ -484,7 +509,7 @@
 								_this.M = result.month;
 								_this.D = result.date;
 								_this.updateYear({
-									date: currentDate
+									year: _this.yearNum
 								});
 								_this.updateMonth({
 									date: currentDate
@@ -496,7 +521,6 @@
 							};
 						})(current, month, currentDate, showAllDate);
 					}
-
 
 					//设置样式
 					if (j === 0 || j === 6) { //周末
@@ -535,15 +559,31 @@
 	KW.extend(fn, new KW.Kingwell);
 	KW.extend(fn, new CalendarDefault);
 
-	var c = new Calendar({
-		el: document.getElementById('calendar'),
-		minDate: '2006-03-05',
-		maxDate: '2016-04-20',
-		showAllDate: false,
-		readOnly:false,
-		error: function(err) {
-			console.error(err);
-		}
-	});
-	window.c = c;
+	window.Calendar = Calendar;
+
 })(this);
+
+var c1 = new Calendar({
+	el: document.getElementById('calendar1'),
+	minDate: '2001-02-01',
+	maxDate: '2001-02-02',
+	left: 0,
+	top: 10,
+	showAllDate: false,
+	readOnly: true,
+	error: function(err) {
+		console.error(err);
+	}
+});
+var c2 = new Calendar({
+	el: document.getElementById('calendar2'),
+	minDate: '2015-02-02',
+	maxDate: '2019-01-01',
+	left: 0,
+	top: 10,
+	showAllDate: false,
+	readOnly: true,
+	error: function(err) {
+		console.error(err);
+	}
+});
