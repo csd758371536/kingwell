@@ -44,6 +44,14 @@
 			}
 			return result;
 		},
+		getDateAll: function(dateObj) {
+			var date = dateObj || new Date();
+			return {
+				year: date.getFullYear(),
+				month: date.getMonth(),
+				date: date.getDate()
+			};
+		},
 		getDate: function() {
 			return new Date();
 		},
@@ -79,6 +87,9 @@
 			_end = new Date(argEnd);
 			result = Math.floor((_end.getTime() - _start.getTime()) / (1000 * 60 * 60 * 24));
 			return isNaN(result) ? 0 : result;
+		},
+		isValidDate: function(date) {
+			return date !== '' && (new Date(date) + '') !== 'Invalid Date';
 		}
 	};
 	//判断是否某种类型
@@ -431,7 +442,8 @@
 		Css: MyCss,
 		Event: MyEvent,
 		Date: MyDate,
-		Box: MyBox
+		Box: MyBox,
+		Kingwell: Kingwell
 	};
 
 	//继承

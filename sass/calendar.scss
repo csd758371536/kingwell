@@ -112,6 +112,11 @@ body {
 			font-size: 18px;
 			font-weight: bold;
 			color: #999;
+
+			&:hover {
+				color: $selectColor;
+			}
+
 		}
 
 	}
@@ -165,7 +170,7 @@ body {
 	}
 
 	.calendar-date-table-box {
-		margin: 20px 15px;
+		margin: 16px 15px;
 	}
 
 	.calendar-year-box {
@@ -184,7 +189,7 @@ body {
 
 	.calendar-date-box {
 		td {
-			padding: 8px;
+			padding: 7px 8px;
 		}
 
 	}
@@ -192,9 +197,10 @@ body {
 }
 
 .calendar-input {
-	border: 1px solid #aaa;
+	border: 1px solid #ccc;
 	height: 30px;
 	line-height: 30px;
 	padding: 0 5px;
+	margin: 20px;
 	width: 150px;
 }

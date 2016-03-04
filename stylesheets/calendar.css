@@ -108,6 +108,10 @@ body {
   font-weight: bold;
   color: #999;
 }
+.calendar-box .calendar-year-prev span:hover,
+.calendar-box .calendar-year-next span:hover {
+  color: #F7AA1C;
+}
 .calendar-box .calendar-year-header,
 .calendar-box .calendar-month-header,
 .calendar-box .calendar-date-header {
@@ -132,7 +136,7 @@ body {
   margin: 15px 15px;
 }
 .calendar-box .calendar-date-table-box {
-  margin: 20px 15px;
+  margin: 16px 15px;
 }
 .calendar-box .calendar-year-box td {
   padding: 7px 8px;
@@ -141,13 +145,14 @@ body {
   padding: 7px 8px;
 }
 .calendar-box .calendar-date-box td {
-  padding: 8px;
+  padding: 7px 8px;
 }
 
 .calendar-input {
-  border: 1px solid #aaa;
+  border: 1px solid #ccc;
   height: 30px;
   line-height: 30px;
   padding: 0 5px;
+  margin: 20px;
   width: 150px;
 }
