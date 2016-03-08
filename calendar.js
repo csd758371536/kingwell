@@ -4,14 +4,15 @@
 	function MyCalendarDefault() {}
 	MyCalendarDefault.prototype = {
 		weekStart: 0,
-		error: function() {},
-		callback: function() {},
+		error: function() {}, //出错回调
+		callback: function() {}, //回调，this为实例，第一个参数为date string，第二个参数为一个对象
 		selected: function() {},
-		top: 5,
-		left: 0,
-		minDate: '',
-		maxDate: '',
-		readOnly: true,
+		top: 5, //左边距离
+		left: 0, //上边距离 
+		skin: '', //皮肤样式
+		minDate: '', //最小日期
+		maxDate: '', //最大日期
+		readOnly: true, //插件只读
 		showAllDate: false, //显示所有日期，包括上月，下月的日期
 		showWeek: false,
 		weekText: ['日', '一', '二', '三', '四', '五', '六'],
@@ -53,6 +54,8 @@
 			var date = null,
 				value = this.defaultValue || this.el.value;
 			if (this.isValidDate(value)) {
+				this.el.value = value;
+				this.text(this.el, value);
 				date = this.compatibleDateFormat(value);
 			}
 			this.DATE = this.getDate(date); /*new Date('2016-03-25');*/
@@ -65,6 +68,7 @@
 			this.initDate();
 			this.create();
 			this.events();
+			this.addClass(this.box, this.skin);
 		},
 		events: function() {
 			var _this = this;
@@ -86,7 +90,6 @@
 			_this.box.onmouseout = function() {
 				_this.editStatus = false;
 				_this.el.focus();
-				console.log(0);
 			};
 			_this.box.onclick = function() {
 				//_this.el.focus();
@@ -628,6 +631,19 @@ var myCalendar = new MyCalendar({
 	showAllDate: true, //显示所有日期，包括上月、下月
 	minDate: '2015-02-02',
 	maxDate: '2018-02-02',
+	left: 0, //距目标元素的左边距离
+	top: 20, //距目标元素的上边距离
+	callback: function(date, arg) {
+		//this == myCalendar;
+		alert(date);
+	}
+});
+var myCalendar = new MyCalendar({
+	el: document.getElementById('calendar8'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月
+	minDate: '2015-02-02',
+	maxDate: '2018-02-02',
+	skin: 'calendar-ui', //皮肤样式名
 	left: 0, //距目标元素的左边距离
 	top: 20, //距目标元素的上边距离
 	callback: function(date, arg) {
