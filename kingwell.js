@@ -271,6 +271,26 @@
 			}
 			return node;
 		},
+		setAttribute: function(o, obj) {
+			if (this.isElement(o) && this.isPlainObject(obj)) {
+				for (var i in obj) {
+					if (i.toLowerCase() === 'class' || i.toLowerCase() === 'for') {
+						o.setAttribute(i, obj[i]);
+					} else {
+						o[i] = obj[i];
+					}
+				}
+			}
+		},
+		getAttribute: function(o, obj) {
+			if (this.isElement(o) && this.isString(obj)) {
+				if (obj.toLowerCase() === 'class' || obj.toLowerCase() === 'for') {
+					return o.getAttribute(obj);
+				} else {
+					return o.obj;
+				}
+			}
+		},
 		remove: function(o) {
 			if (o && o.parentNode) {
 				o.parentNode.removeChild(o);

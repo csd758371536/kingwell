@@ -1,9 +1,5 @@
 @import 'mixin';
 
-body {
-	font-size: 12px;
-}
-
 .fl {
 	@include float(left);
 }
@@ -197,13 +193,4 @@ body {
 
 	}
 
-}
-
-.calendar-input {
-	border: 1px solid #ccc;
-	height: 30px;
-	line-height: 30px;
-	padding: 0 5px;
-	margin: 20px 200px 0 200px;
-	width: 150px;
 }

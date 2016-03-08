@@ -1,8 +1,8 @@
 (function(window, undefined) {
 	var fn;
 
-	function CalendarDefault() {}
-	CalendarDefault.prototype = {
+	function MyCalendarDefault() {}
+	MyCalendarDefault.prototype = {
 		weekStart: 0,
 		error: function() {},
 		callback: function() {},
@@ -16,10 +16,10 @@
 		showWeek: false,
 		weekText: ['日', '一', '二', '三', '四', '五', '六'],
 		headerUnit: ['年', '月', '日'],
-		monthUnit: ['月'],
+		monthUnit: ['月']
 	};
 
-	function Calendar(options) {
+	function MyCalendar(options) {
 		var ops = options || {};
 		this.el = ops.el;
 		for (var key in options) {
@@ -29,11 +29,14 @@
 		this.minDate = this.compatibleDateFormat(this.minDate);
 		this.init();
 	}
-	Calendar.prototype = fn = {
+	MyCalendar.prototype = fn = {
 		name: 'calendar',
 		setValue: function() {
 			var _this = this;
-			_this.defaultValue = _this.el.value;
+			if (!_this.defaultValue) {
+				_this.defaultValue = _this.el.value;
+			}
+
 			if (_this.readOnly) {
 				_this.el.readOnly = true;
 			}
@@ -48,7 +51,7 @@
 		},
 		initDate: function() {
 			var date = null,
-				value = this.el.value;
+				value = this.defaultValue || this.el.value;
 			if (this.isValidDate(value)) {
 				date = this.compatibleDateFormat(value);
 			}
@@ -58,6 +61,7 @@
 			this.D = this.DATE.getDate();
 		},
 		init: function() {
+			this.el.tabIndex = 0;
 			this.initDate();
 			this.create();
 			this.events();
@@ -69,7 +73,23 @@
 				_this.open();
 			};
 			_this.el.onblur = function() {
-				//_this.close();
+				clearTimeout(_this.timer);
+				_this.timer = setTimeout(function() {
+					if (!_this.editStatus) {
+						_this.close();
+					}
+				}, 100);
+			};
+			_this.box.onmousedown = function() {
+				_this.editStatus = true;
+			};
+			_this.box.onmouseout = function() {
+				_this.editStatus = false;
+				_this.el.focus();
+				console.log(0);
+			};
+			_this.box.onclick = function() {
+				//_this.el.focus();
 			};
 			_this.yearPrev.onclick = function() {
 				_this.yearNum -= 10;
@@ -95,20 +115,30 @@
 		},
 		select: function() {
 			var _this = this,
-				date = this.getNewDate(this.Y, this.M, this.D);
+				args = arguments[0],
+				date = this.getNewDate(this.Y, this.M, this.D),
+				dateString = _this.getCurrentDate(date);
 			try {
-
-				if (_this.isElement(_this.el)) {
+				if (_this.isElement(_this.el) && args.type === 'date') {
 					_this.el.value = _this.getCurrentDate(date);
+					_this.text(_this.el, dateString);
+					_this.editStatus = false;
+					_this.callback.call(_this, dateString, args);
+					_this.el.blur();
 				}
+				//_this.log(args);
 			} catch (e) {};
-			if (arguments[0].type === 'date') {
+			if (args.type === 'date') {
 				_this.close();
 			}
-
 		},
 		log: function() {
-			console.log(this.editStatus);
+			try {
+				console.log.apply(console, arguments);
+			} catch (e) {
+
+			}
+			return this;
 		},
 		__createYear: function() {
 			var _this = this;
@@ -116,44 +146,33 @@
 				className: _this.name + '-box'
 			});
 			//年份
-			var yearTableElement = [{
-				yearHeader: ['div', {
-					className: _this.name + '-year-header'
-				}]
-			}, {
-				yearBox: ['div', {
-					className: _this.name + '-year-box'
-				}]
-			}, {
-				yearTableBox: ['div', {
-					className: _this.name + '-year-table-box'
-				}]
-			}, {
-				yearTable: ['table', {
-					className: _this.name + '-year-table'
-				}]
-			}, {
-				yearThead: ['thead', {
-					className: _this.name + '-year-thead'
-				}]
-			}, {
-				yearTbody: ['tbody', {
-					className: _this.name + '-year-body'
-				}]
-			}, {
-				yearPage: ['div', {
-					className: _this.name + '-year-page'
-				}]
-			}, {
-				yearPrev: ['div', {
-					className: _this.name + '-year-prev'
-				}]
-			}, {
-				yearNext: ['div', {
-					className: _this.name + '-year-next'
-				}]
-			}];
-			_this.createElements(_this, yearTableElement);
+			_this.yearHeader = _this.createElement('div', {
+				className: _this.name + '-year-header'
+			});
+			_this.yearBox = _this.createElement('div', {
+				className: _this.name + '-year-box'
+			});
+			_this.yearTableBox = _this.createElement('div', {
+				className: _this.name + '-year-table-box'
+			});
+			_this.yearTable = _this.createElement('table', {
+				className: _this.name + '-year-table'
+			});
+			_this.yearThead = _this.createElement('thead', {
+				className: _this.name + '-year-thead'
+			});
+			_this.yearTbody = _this.createElement('tbody', {
+				className: _this.name + '-year-body'
+			});
+			_this.yearPage = _this.createElement('div', {
+				className: _this.name + '-year-page'
+			});
+			_this.yearPrev = _this.createElement('div', {
+				className: _this.name + '-year-prev'
+			});
+			_this.yearNext = _this.createElement('div', {
+				className: _this.name + '-year-next'
+			});
 			_this.append(_this.yearThead, _this.yearTable);
 			_this.append(_this.yearTbody, _this.yearTable);
 			_this.updateYear();
@@ -170,89 +189,60 @@
 		__createMonth: function() {
 			var _this = this;
 			//月份
-			var monthTableElements = [{
-				monthBox: ['div', {
-					className: _this.name + '-month-box'
-				}]
-			}, {
-				monthHeader: ['div', {
-					className: _this.name + '-month-header'
-				}]
-			}, {
-				monthTableBox: ['div', {
-					className: _this.name + '-month-table-box'
-				}]
-			}, {
-				monthTable: ['table', {
-					className: _this.name
-				}]
-			}, {
-				monthThead: ['thead', {
-					className: _this.name
-				}]
-			}, {
-				monthTbody: ['tbody', {
-					className: _this.name
-				}]
-			}, {
-				monthTfoot: ['tfoot', {
-					className: _this.name
-				}]
-			}];
-			_this.createElements(_this, monthTableElements);
+			this.monthBox = _this.createElement('div', {
+				className: _this.name + '-month-box'
+			});
+			this.monthHeader = _this.createElement('div', {
+				className: _this.name + '-month-header'
+			});
+			this.monthTableBox = _this.createElement('div', {
+				className: _this.name + '-month-table-box'
+			});
+			this.monthTable = _this.createElement('table');
+			this.monthThead = _this.createElement('thead');
+			this.monthTbody = _this.createElement('tbody');
+			this.monthTfoot = _this.createElement('tfoot');
 			_this.append(_this.monthThead, _this.monthTable);
 			_this.append(_this.monthTfoot, _this.monthTable);
 			_this.append(_this.monthTbody, _this.monthTable);
-			_this.updateMonth();
 			_this.append(_this.monthHeader, _this.monthBox);
 			_this.append(_this.monthTable, _this.monthTableBox);
 			_this.append(_this.monthTableBox, _this.monthBox);
 			_this.append(_this.monthBox, _this.box);
+			_this.updateMonth();
 		},
 		__createDate: function() {
 			var _this = this;
 			//天数
-			var dateTableElments = [{
-				dateBox: ['div', {
-					className: _this.name + '-date-box'
-				}]
-			}, {
-				dateHeader: ['div', {
-					className: _this.name + '-date-header'
-				}]
-			}, {
-				dateTableBox: ['div', {
-					className: _this.name + '-date-table-box'
-				}]
-			}, {
-				dateTable: ['table', {
-					className: _this.name
-				}]
-			}, {
-				dateThead: ['thead', {
-					className: _this.name
-				}]
-			}, {
-				dateTbody: ['tbody', {
-					className: _this.name
-				}]
-			}, {
-				dateTfoot: ['tfoot', {
-					className: _this.name
-				}]
-			}];
-			_this.createElements(_this, dateTableElments);
+			_this.dateBox = _this.createElement('div', {
+				className: _this.name + '-date-box'
+			});
+			_this.dateHeader = _this.createElement('div', {
+				className: _this.name + '-date-header'
+			});
+			_this.dateTableBox = _this.createElement('div', {
+				className: _this.name + '-date-table-box'
+			});
+			_this.dateTable = _this.createElement('table', {
+				className: _this.name
+			});
+			_this.dateThead = _this.createElement('thead', {
+				className: _this.name
+			});
+			_this.dateTbody = _this.createElement('tbody', {
+				className: _this.name
+			});
+			_this.dateTfoot = _this.createElement('tfoot', {
+				className: _this.name
+			});
 			_this.append(_this.dateThead, _this.dateTable);
 			_this.append(_this.dateTfoot, _this.dateTable);
 			_this.append(_this.dateTbody, _this.dateTable);
 			_this.append(_this.dateHeader, _this.dateBox);
-			_this.updateDate();
-
 			_this.append(_this.dateTable, _this.dateTableBox);
 			_this.append(_this.dateTableBox, _this.dateBox);
-
 			_this.append(_this.dateBox, _this.box);
-
+			_this.updateDate();
 		},
 		create: function() {
 			this.lock = true;
@@ -282,7 +272,6 @@
 		},
 		close: function() {
 			var _this = this;
-			_this.lock = false;
 			_this.remove(_this.box);
 		},
 		getEnableStatus: function(value, type) { //获取日期范围
@@ -311,8 +300,13 @@
 					}
 					break;
 				case 'date':
-					minStatus = _this.getDates(_this.getCurrentDate(value), _this.maxDate) < 0;
-					maxStatus = _this.getDates(_this.getCurrentDate(value), _this.minDate) > 0;
+
+					if (_this.minDate) {
+						minStatus = _this.getDates(_this.minDate, _this.getCurrentDate(value)) < 0;
+					}
+					if (_this.maxDate) {
+						maxStatus = _this.getDates(_this.maxDate, _this.getCurrentDate(value)) > 0;
+					}
 					break;
 			}
 			//最小日期
@@ -423,9 +417,9 @@
 					(function(month) {
 
 						td.onclick = function() {
+							var date = new Date();
 							_this.M = month;
 							_this.updateMonth();
-							var date = new Date();
 							date.setYear(_this.Y);
 							date.setMonth(_this.M);
 							_this.updateDate({
@@ -589,8 +583,87 @@
 	KW.extend(fn, new KW.Event);
 	KW.extend(fn, new KW.Box);
 	KW.extend(fn, new KW.Kingwell);
-	KW.extend(fn, new CalendarDefault);
-
-	window.Calendar = Calendar;
+	KW.extend(fn, new MyCalendarDefault);
+	MyCalendar.toString = function() {
+		return '日历插件';
+	};
+	window.MyCalendar = MyCalendar;
 
 })(this);
+
+
+new MyCalendar({
+	el: document.getElementById('calendar1') //el为DOM结点
+});
+new MyCalendar({
+	el: document.getElementById('calendar2'), //el为DOM结点
+	showAllDate: true //显示所有日期，包括上月、下月
+});
+new MyCalendar({
+	el: document.getElementById('calendar3'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月
+	defaultValue: '2016-02-08' //默认值 
+});
+
+new MyCalendar({
+	el: document.getElementById('calendar4'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月	
+});
+new MyCalendar({
+	el: document.getElementById('calendar5'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月
+	minDate: '2015-02-02',
+	maxDate: '2018-02-02'
+});
+new MyCalendar({
+	el: document.getElementById('calendar6'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月
+	minDate: '2015-02-02',
+	maxDate: '2018-02-02',
+	left: 0, //距目标元素的左边距离
+	top: 20 //距目标元素的上边距离
+});
+var myCalendar = new MyCalendar({
+	el: document.getElementById('calendar7'), //el为DOM结点
+	showAllDate: true, //显示所有日期，包括上月、下月
+	minDate: '2015-02-02',
+	maxDate: '2018-02-02',
+	left: 0, //距目标元素的左边距离
+	top: 20, //距目标元素的上边距离
+	callback: function(date, arg) {
+		//this == myCalendar;
+		alert(date);
+	}
+});
+// new MyCalendar({
+// 	el: document.getElementById('calendar2'),
+// 	minDate: '2015-02-02',
+// 	maxDate: '2019-01-01',
+// 	defaultValue: '',
+// 	left: 0,
+// 	top: 10,
+// 	showAllDate: false,
+// 	readOnly: true,
+// 	callback: function(arg) {
+// 		console.log(arg);
+// 	},
+// 	error: function(err) {
+// 		console.error(err);
+// 	}
+// });
+// new MyCalendar({
+// 	el: document.getElementById('calendar3'),
+// 	minDate: '2015-02-02',
+// 	maxDate: '2019-01-01',
+// 	defaultValue: '',
+// 	left: 0,
+// 	top: 10,
+// 	showAllDate: false,
+// 	readOnly: true,
+// 	callback: function(arg) {
+// 		console.log(arg);
+// 	},
+// 	error: function(err) {
+// 		console.error(err);
+// 	}
+// });
