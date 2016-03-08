@@ -52,8 +52,16 @@
 				date: date.getDate()
 			};
 		},
-		getDate: function() {
-			return new Date();
+		getDate: function(date) {
+			var dateObj = null;
+			if (this.isString(date)) {
+				dateObj = new Date(date);
+			} else if (date) {
+				dateObj = date;
+			} else {
+				dateObj = new Date();
+			}
+			return dateObj;
 		},
 		getCurrentDate: function(dateObj, format) {
 			var formats = ['yyyy-mm-dd', 'yyyy/mm/dd', 'yyyy.mm.dd'],
@@ -262,6 +270,11 @@
 				}
 			}
 			return node;
+		},
+		remove: function(o) {
+			if (o && o.parentNode) {
+				o.parentNode.removeChild(o);
+			}
 		},
 		addClass: function(o, str) {
 			if (!this.isElement(o)) {

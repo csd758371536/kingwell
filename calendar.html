@@ -6,11 +6,38 @@
 		<link rel="stylesheet" href="stylesheets/calendar.css">
 	</head>
 	<body>
-		
-		<input class="calendar-input" type="text" name="" id="calendar1" />
-		<input class="calendar-input" type="text" name="" id="calendar2" />
+		<input class="calendar-input" value="2012-02-01" type="text" name="" id="calendar1" />
+		<input class="calendar-input" value="" type="text" name="" id="calendar2" />
 		<script src="kingwell.js"></script>
 		<script src="local-storage.js"></script>
 		<script src="calendar.js"></script>
+		<script>
+			var c1 = new Calendar({
+				el: document.getElementById('calendar1'),
+				minDate: '2012-02-02',
+				maxDate: '',
+				left: 0,
+				top: 10,
+				showAllDate: true,
+				readOnly: true,
+				error: function(err) {
+					console.error(err);
+				}
+			});
+			c1.open();
+			var c2 = new Calendar({
+				el: document.getElementById('calendar2'),
+				minDate: '2015-02-02',
+				maxDate: '2019-01-01',
+				left: 0,
+				top: 10,
+				showAllDate: false,
+				readOnly: true,
+				error: function(err) {
+					console.error(err);
+				}
+			});
+
+		</script>
 	</body>
 </html>

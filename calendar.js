@@ -27,11 +27,6 @@
 		}
 		this.maxDate = this.compatibleDateFormat(this.maxDate);
 		this.minDate = this.compatibleDateFormat(this.minDate);
-
-		this.DATE = this.getDate(); /*new Date('2016-03-25');*/ //
-		this.Y = this.DATE.getFullYear();
-		this.M = this.DATE.getMonth();
-		this.D = this.DATE.getDate();
 		this.init();
 	}
 	Calendar.prototype = fn = {
@@ -51,17 +46,43 @@
 				left: pos.left + _this.left + 'px'
 			});
 		},
+		initDate: function() {
+			var date = null,
+				value = this.el.value;
+			if (this.isValidDate(value)) {
+				date = this.compatibleDateFormat(value);
+			}
+			this.DATE = this.getDate(date); /*new Date('2016-03-25');*/
+			this.Y = this.DATE.getFullYear();
+			this.M = this.DATE.getMonth();
+			this.D = this.DATE.getDate();
+		},
 		init: function() {
-			this.dateError = this.getDateStatus();
-			this.yearNum = 0;
+			this.initDate();
 			this.create();
 			this.events();
-			this.setPostion();
-			this.setValue();
-			if (!this.dateError) {
-				this.error.call(this, '最小日期不能大于最大日期');
-			}
+		},
+		events: function() {
+			var _this = this;
 
+			_this.el.onfocus = function() {
+				_this.open();
+			};
+			_this.el.onblur = function() {
+				//_this.close();
+			};
+			_this.yearPrev.onclick = function() {
+				_this.yearNum -= 10;
+				_this.updateYear({
+					year: _this.yearNum
+				});
+			};
+			_this.yearNext.onclick = function() {
+				_this.yearNum += 10;
+				_this.updateYear({
+					year: _this.yearNum
+				});
+			};
 		},
 		getDateStatus: function() { //判断最小日期是否大于最大日历
 			var status = true;
@@ -80,26 +101,14 @@
 				if (_this.isElement(_this.el)) {
 					_this.el.value = _this.getCurrentDate(date);
 				}
-			} catch (e) {}
-		},
-		events: function() {
-			var _this = this;
+			} catch (e) {};
+			if (arguments[0].type === 'date') {
+				_this.close();
+			}
 
-			_this.el.onfocus = function() {
-				//_this.create();
-			};
-			_this.yearPrev.onclick = function() {
-				_this.yearNum -= 10;
-				_this.updateYear({
-					year: _this.yearNum
-				});
-			};
-			_this.yearNext.onclick = function() {
-				_this.yearNum += 10;
-				_this.updateYear({
-					year: _this.yearNum
-				});
-			};
+		},
+		log: function() {
+			console.log(this.editStatus);
 		},
 		__createYear: function() {
 			var _this = this;
@@ -243,9 +252,10 @@
 			_this.append(_this.dateTableBox, _this.dateBox);
 
 			_this.append(_this.dateBox, _this.box);
-			_this.append(_this.box);
+
 		},
 		create: function() {
+			this.lock = true;
 			this.__createYear();
 			this.__createMonth();
 			this.__createDate();
@@ -259,6 +269,21 @@
 				}
 			}
 			return context;
+		},
+		open: function() {
+			this.append(this.box);
+			this.setPostion();
+			this.setValue();
+			this.dateError = this.getDateStatus();
+			this.yearNum = 0;
+			if (!this.dateError) {
+				this.error.call(this, '最小日期不能大于最大日期');
+			}
+		},
+		close: function() {
+			var _this = this;
+			_this.lock = false;
+			_this.remove(_this.box);
 		},
 		getEnableStatus: function(value, type) { //获取日期范围
 			var _this = this,
@@ -338,7 +363,6 @@
 				tbodyTr, td, i = 0;
 			_this.empty(_this.yearTbody);
 			_this.yearHeader.innerHTML = _this.Y + _this.headerUnit[0];
-			console.log(_this.Y);
 			for (var y = _year - 5; y < _year + 5; y++) {
 				var status = true;
 				if (i % grid === 0) {
@@ -359,6 +383,9 @@
 							});
 							_this.updateMonth();
 							_this.updateDate();
+							_this.select({
+								type: 'year'
+							});
 						};
 					})(y);
 					_this.addClass(td, _this.name + '-enabled');
@@ -403,6 +430,9 @@
 							date.setMonth(_this.M);
 							_this.updateDate({
 								date: date
+							});
+							_this.select({
+								type: 'month'
 							});
 						};
 					})(m);
@@ -517,7 +547,9 @@
 								_this.updateDate({
 									date: currentDate
 								});
-								_this.select();
+								_this.select({
+									type: 'date'
+								});
 							};
 						})(current, month, currentDate, showAllDate);
 					}
@@ -562,28 +594,3 @@
 	window.Calendar = Calendar;
 
 })(this);
-
-var c1 = new Calendar({
-	el: document.getElementById('calendar1'),
-	minDate: '2001-02-01',
-	maxDate: '2001-02-02',
-	left: 0,
-	top: 10,
-	showAllDate: false,
-	readOnly: true,
-	error: function(err) {
-		console.error(err);
-	}
-});
-var c2 = new Calendar({
-	el: document.getElementById('calendar2'),
-	minDate: '2015-02-02',
-	maxDate: '2019-01-01',
-	left: 0,
-	top: 10,
-	showAllDate: false,
-	readOnly: true,
-	error: function(err) {
-		console.error(err);
-	}
-});
