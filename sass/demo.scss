@@ -53,3 +53,29 @@ pre {
 	border-radius: 3px;
 	background-color: #fea;
 }
+
+.calendar-ui {
+	&,
+	.calendar-year-box,
+	.calendar-month-box,
+	.calendar-date-box {
+		border-color: #666;
+	}
+
+	.calendar-year-header,
+	.calendar-month-header,
+	.calendar-date-header {
+		background-color: #333;
+		color: #fff;
+	}
+
+	tbody .calendar-this-year,
+	tbody .calendar-this-year:hover,
+	tbody .calendar-this-month,
+	tbody .calendar-this-month:hover,
+	tbody .calendar-today,
+	tbody .calendar-today:hover {
+		background-color: #333;
+	}
+
+}

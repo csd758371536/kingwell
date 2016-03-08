@@ -104,3 +104,24 @@ pre {
   border-radius: 3px;
   background-color: #fea;
 }
+
+.calendar-ui,
+.calendar-ui .calendar-year-box,
+.calendar-ui .calendar-month-box,
+.calendar-ui .calendar-date-box {
+  border-color: #666;
+}
+.calendar-ui .calendar-year-header,
+.calendar-ui .calendar-month-header,
+.calendar-ui .calendar-date-header {
+  background-color: #333;
+  color: #fff;
+}
+.calendar-ui tbody .calendar-this-year,
+.calendar-ui tbody .calendar-this-year:hover,
+.calendar-ui tbody .calendar-this-month,
+.calendar-ui tbody .calendar-this-month:hover,
+.calendar-ui tbody .calendar-today,
+.calendar-ui tbody .calendar-today:hover {
+  background-color: #333;
+}

@@ -265,6 +265,7 @@
 		},
 		open: function() {
 			this.append(this.box);
+			this.initDate();
 			this.setPostion();
 			this.setValue();
 			this.dateError = this.getDateStatus();
@@ -648,9 +649,10 @@ var myCalendar = new MyCalendar({
 	top: 20, //距目标元素的上边距离
 	callback: function(date, arg) {
 		//this == myCalendar;
-		alert(date);
+		//alert(date);
 	}
 });
+myCalendar.open();
 // new MyCalendar({
 // 	el: document.getElementById('calendar2'),
 // 	minDate: '2015-02-02',
